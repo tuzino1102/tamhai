@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>第一屆淡海杯 傳說對決體驗賽</title>
+<meta property="og:title" content="第一屆淡海杯 傳說對決體驗賽">
+<meta property="og:description" content="給大學電競一個初次體驗的夢">
+<meta property="og:image" content="img/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Serif+TC:wght@900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--panel:rgba(16,17,24,.78);--gold:#f5b81c;--gold2:#ffd968;--white:#f4f2ec;--dim:#9a9caa;--line:rgba(245,184,28,.5);--vh:100dvh}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);height:100%;overflow:hidden;overscroll-behavior:none}
+body{color:var(--white);font-family:"Noto Sans TC",sans-serif;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+
+/* ---------- 全域背景 ---------- */
+#bg{position:fixed;inset:0;background:url(img/bg.jpg) center top/cover;filter:brightness(.3) saturate(1.1);transform:scale(1.05);transition:transform 1s cubic-bezier(.6,0,.2,1)}
+#bg::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.55) 55%,#000 95%)}
+
+/* ---------- 頁面堆疊 ---------- */
+#deck{position:fixed;inset:0;touch-action:none}
+.page{position:absolute;inset:0;height:var(--vh);display:flex;flex-direction:column;justify-content:center;
+  padding:calc(env(safe-area-inset-top) + 28px) 26px calc(env(safe-area-inset-bottom) + 34px);visibility:hidden;overflow:hidden}
+.page.active{visibility:visible}
+.page .wrap{width:100%;max-width:520px;margin:0 auto}
+#sweep{position:fixed;left:-20%;width:140%;height:4px;background:linear-gradient(90deg,transparent,var(--gold2),#fff,var(--gold2),transparent);
+  transform:rotate(-8deg);opacity:0;pointer-events:none;z-index:20;box-shadow:0 0 18px var(--gold)}
+
+/* 右側頁碼 */
+#pager{position:fixed;right:7px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:10}
+#pager b{width:3px;height:14px;background:rgba(255,255,255,.25);transition:height .35s,background .35s}
+#pager b.on{height:30px;background:var(--gold)}
+
+/* ---------- 開場動畫 ---------- */
+#intro{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#intro .flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,217,104,.9),transparent 55%);opacity:0;animation:flash 1s .55s ease-out forwards}
+#intro img{width:62vw;max-width:300px;border-radius:50%;mix-blend-mode:screen;transform:scale(.3) rotate(-25deg);opacity:0;animation:logoIn .9s cubic-bezier(.2,1.4,.4,1) .15s forwards}
+#intro .slash{position:absolute;height:5px;width:140vw;background:linear-gradient(90deg,transparent,var(--gold2),#fff,transparent);transform:rotate(-24deg) translateX(-120%);animation:slash .7s .5s ease-in forwards}
+#intro .slash.b{height:2px;animation-delay:.62s;top:62%}
+#intro .welcome{margin-top:26px;text-align:center;opacity:0;transform:translateY(14px);animation:up .6s 1.35s forwards}
+#intro.out{animation:out .45s forwards}
+@keyframes logoIn{to{transform:scale(1) rotate(0);opacity:1}}
+@keyframes flash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes slash{to{transform:rotate(-24deg) translateX(120%)}}
+@keyframes up{to{opacity:1;transform:none}}
+@keyframes out{to{opacity:0;visibility:hidden}}
+.kicker{display:block;font-family:Orbitron,sans-serif;font-weight:900;letter-spacing:.32em;font-size:12px;color:var(--gold)}
+.bigname{display:block;margin-top:8px;font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(32px,10vw,48px);line-height:1.1;transform:scaleX(.9) skewX(-10deg)}
+
+/* ---------- 封面 ---------- */
+.cover{text-align:center}
+.cover .logo{width:min(64vw,40dvh,300px);border-radius:50%;mix-blend-mode:screen;filter:drop-shadow(0 0 30px rgba(245,184,28,.35))}
+.cover .bigname{margin-top:12px}
+.badge{display:inline-block;margin-top:16px;padding:6px 16px 6px 14px;font-weight:900;font-size:14px;background:var(--gold);color:#140f02;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.badge.live{background:#e0392f;color:#fff}
+.badge.live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;margin-right:7px;vertical-align:1px;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.2}}
+.hint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 18px);text-align:center;font-size:12px;letter-spacing:.2em;color:var(--dim)}
+.hint i{display:block;width:12px;height:12px;margin:0 auto 6px;border-left:2px solid var(--gold);border-top:2px solid var(--gold);transform:rotate(45deg);animation:bob 1.4s infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(45deg)}}
+
+/* ---------- 共用 ---------- */
+h2{font-family:Orbitron,"Noto Sans TC",sans-serif;font-weight:900;font-size:13px;letter-spacing:.24em;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.ptitle{font-family:"Noto Serif TC",serif;font-weight:900;font-size:30px;margin:-6px 0 18px;transform:scaleX(.92) skewX(-10deg);transform-origin:left}
+.panel{background:linear-gradient(100deg,var(--panel) 70%,rgba(16,17,24,.2));padding:18px 20px;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);border-left:3px solid var(--gold);font-size:15px;line-height:1.9}
+.panel em{font-style:normal;color:var(--gold2);font-weight:700}
+.btns{display:grid;gap:10px;margin-top:18px}
+.btn{display:block;text-align:center;text-decoration:none;color:var(--white);font-weight:700;padding:15px;background:var(--panel);border:1px solid var(--line);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+.btn.main{background:linear-gradient(100deg,var(--gold),var(--gold2));color:#140f02;border:none}
+
+/* 戰績 */
+.series{display:grid;gap:10px}
+.series .row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(100deg,var(--panel) 75%,rgba(16,17,24,.2));clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+.series .rd{font-family:Orbitron,"Noto Sans TC",sans-serif;font-size:11px;letter-spacing:.15em;color:var(--dim)}
+.series .vs{font-weight:700;font-size:17px;margin-top:2px}
+.series .sc{font-family:Orbitron,sans-serif;font-weight:900;font-size:24px}
+.series .row.w{border-left:3px solid var(--gold)}.series .row.w .sc{color:var(--gold2)}
+.series .row.l{border-left:3px solid #555a68}.series .row.l .sc{color:var(--dim)}
+
+/* 六維圖 */
+.toggle{display:flex;align-items:center;gap:10px;margin:-4px 0 12px;font-size:13px;color:var(--dim);cursor:pointer;width:max-content}
+.toggle i{width:38px;height:20px;border-radius:20px;background:#2a2d38;position:relative;transition:background .2s}
+.toggle i::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#888;transition:left .2s,background .2s}
+.toggle.on i{background:rgba(255,255,255,.25)}.toggle.on i::after{left:21px;background:#fff}
+.toggle.on{color:var(--white)}
+.cards{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 -26px;padding:0 26px;scrollbar-width:none;touch-action:pan-x}
+.cards::-webkit-scrollbar{display:none}
+.pcard{flex:0 0 100%;scroll-snap-align:center;background:linear-gradient(160deg,rgba(28,30,40,.92),rgba(10,11,16,.92));padding:16px 16px 12px;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px));position:relative}
+.pcard::before{content:"";position:absolute;top:0;left:0;width:60%;height:3px;background:linear-gradient(90deg,var(--gold),transparent)}
+.pid{font-weight:900;font-size:22px}
+.pmeta{font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:.15em;color:var(--dim);margin-top:2px}
+.pcard svg{display:block;width:100%;max-height:40dvh;margin-top:4px}
+.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--dim)}
+.legend span::before{content:"";display:inline-block;width:12px;height:3px;margin-right:6px;vertical-align:3px;background:var(--gold)}
+.legend span.avg::before{background:#fff;opacity:.8}
+.legend .avg{display:none}.show-avg .legend .avg{display:inline}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
+.dots b{width:6px;height:6px;border-radius:6px;background:#3a3d4a;transition:width .25s,background .25s}
+.dots b.on{width:20px;background:var(--gold)}
+.swipe{text-align:center;font-size:12px;color:var(--dim);margin-top:6px}
+
+/* 照片、原聲帶 */
+.photo img{width:100%;display:block;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px))}
+.tracks{display:grid;gap:10px}
+.track{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px 16px;background:var(--panel);cursor:pointer;clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+.track .pb{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);display:grid;place-items:center;color:var(--gold);font-size:12px}
+.track.playing .pb{background:var(--gold);color:#140f02}
+.track b{display:block;font-size:16px}.track small{color:var(--dim);font-size:12px}
+.end{text-align:center;margin-top:26px}
+.end img{width:60px;border-radius:50%;mix-blend-mode:screen;opacity:.9}
+.end p{color:var(--dim);font-size:12px;line-height:1.8;margin-top:6px}
+.end .slogan{color:var(--gold);letter-spacing:.3em}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="deck"></div>
+<div id="sweep"></div>
+<nav id="pager"></nav>
+<div id="intro"><div class="flash"></div><div class="slash"></div><div class="slash b"></div><img src="img/logo.jpg" alt=""><div class="welcome"><span class="kicker" id="i-role"></span><span class="bigname" id="i-name"></span></div></div>
+
+<script>
+/* ================================================================
+   資料區（DATA）——賽後由 Claude 統計後填入
+   PHASE：'live' ＝ 賽事當天；'memorial' ＝ 賽後紀念版
+   ================================================================ */
+const PHASE = 'live';
+
+const EVENT = {
+  full: '第一屆淡海杯 傳說對決體驗賽',
+  date: '2026.11.22', venue: '新北電競基地',
+  slogan: '給大學電競一個初次體驗的夢',
+  stream: '',
+  discord: 'https://discord.gg/8e4GuM6HvF',
+  survey: '',
+  photo: '',            // 大合照，例如 'img/group.jpg'
+  thanks: '謝謝你參加第一屆淡海杯。\n希望這一天，你有感受到站上舞台的電競氛圍。',
+  tracks: [],           // 賽後填入，例如：
+  // { title:'開場曲', note:'Opening', src:'audio/opening.mp3' },
+  // { title:'BP 曲', note:'第 1、2 局 Ban/Pick', src:'audio/bp.mp3' },
+  // { title:'決勝 BP 曲', note:'BO3 決勝局 Ban/Pick', src:'audio/bp-final.mp3' },
+};
+
+/* 選手數據為「場均」值（由 Claude 從結算截圖統計）
+   dmg 對英雄傷害｜taken 承受英雄傷害｜part 參團率(%)｜gold 總經濟｜cc 控制效果｜heal 治療量｜tower 對塔傷害 */
+const TEAMS = {
+  a: { name: '兄弟你還活著嗎',   place: '', series: [], players: [] },
+  b: { name: '台大淡大出征淡海', place: '', series: [], players: [] },
+  c: { name: '閃身步',           place: '', series: [], players: [] },
+  d: { name: '兵線給你野區給我', place: '', series: [], players: [] },
+};
+// series：{ round:'勝部 W1', vs:'B 隊', score:'2 : 1', win:true }
+// players：{ id:'遊戲ID', games:3, kda:'12/3/20', dmg:76797, taken:36477, part:66.7, gold:8302, cc:396, heal:5193, tower:12317 }
+
+const STAFF = {
+  ops:  { name: '賽務組', duty: '場控・裁判・對陣安排・選手引導' },
+  cast: { name: '轉播組', duty: '導播・OB・現場畫面與聲音' },
+};
+/* ================================ 以下不用改 ================================ */
+
+const q = new URLSearchParams(location.search);
+const team = TEAMS[(q.get('t')||'').toLowerCase()];
+const staff = STAFF[(q.get('s')||'').toLowerCase()];
+const memorial = PHASE === 'memorial';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const who = team ? team.name : staff ? staff.name : '淡海杯';
+document.title = (team||staff ? who+'｜' : '') + EVENT.full;
+
+/* 開場動畫 */
+$('i-role').textContent = team ? 'WELCOME ・ 歡迎' : staff ? 'THANK YOU ・ 工作人員' : 'TAMHAI CUP';
+$('i-name').textContent = who;
+const endIntro = () => $('intro').classList.add('out');
+$('intro').addEventListener('click', endIntro);
+setTimeout(endIntro, 3000);
+
+/* ---------- 六維圖 ---------- */
+const DIMS = ['輸出','坦度','團戰','發育','支援','推進'];
+const KEYS = ['dmg','taken','part','gold','cc','heal','tower'];
+const ALL = Object.values(TEAMS).flatMap(t => t.players);
+const MAX = {}; KEYS.forEach(k => MAX[k] = Math.max(1, ...ALL.map(p => +p[k] || 0)));
+const scale = v => 20 + 80 * Math.min(1, v);
+const scores = p => [
+  scale((+p.dmg||0)/MAX.dmg), scale((+p.taken||0)/MAX.taken), scale((+p.part||0)/MAX.part),
+  scale((+p.gold||0)/MAX.gold), scale(((+p.cc||0)/MAX.cc + (+p.heal||0)/MAX.heal)/2), scale((+p.tower||0)/MAX.tower)];
+const AVG = ALL.length ? scores(Object.fromEntries(KEYS.map(k => [k, ALL.reduce((s,p)=>s+(+p[k]||0),0)/ALL.length]))) : null;
+function radar(vals){
+  const C = 160, R = 104;
+  const pt = (i, r) => { const a = -Math.PI/2 + i*Math.PI/3; return [C + r*Math.cos(a), C + r*Math.sin(a)]; };
+  const poly = arr => arr.map((v,i)=>pt(i, R*v/100).join(',')).join(' ');
+  let s = `<svg viewBox="0 0 320 320">`;
+  [25,50,75,100].forEach(l => s += `<polygon points="${poly(Array(6).fill(l))}" fill="none" stroke="rgba(255,255,255,${l===100?.28:.1})"/>`);
+  for (let i=0;i<6;i++){ const [x,y]=pt(i,R); s += `<line x1="${C}" y1="${C}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,.1)"/>`; }
+  if (AVG) s += `<polygon class="avgpoly" points="${poly(AVG)}" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-opacity=".75" stroke-dasharray="4 3" style="display:none"/>`;
+  s += `<polygon points="${poly(vals)}" fill="rgba(245,184,28,.32)" stroke="#ffd968" stroke-width="2.5" stroke-linejoin="round"/>`;
+  vals.forEach((v,i)=>{ const [x,y]=pt(i,R*v/100); s += `<circle cx="${x}" cy="${y}" r="3.5" fill="#ffd968"/>`; });
+  DIMS.forEach((d,i)=>{ const [x,y]=pt(i,R+26); s += `<text x="${x}" y="${y}" fill="#f4f2ec" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle" font-family="Noto Sans TC">${d}</text>`; });
+  return s + '</svg>';
+}
+
+/* ---------- 組出每一頁 ---------- */
+const pages = [];
+const page = (inner, cls='') => pages.push(`<section class="page ${cls}"><div class="wrap">${inner}</div></section>`);
+const btn = (href, label, main) => href ? `<a class="btn${main?' main':''}" href="${esc(href)}" target="_blank" rel="noopener">${label}</a>` : '';
+const end = `<div class="end"><img src="img/logo.jpg" alt=""><p class="slogan">${esc(EVENT.slogan)}</p><p>${esc(EVENT.full)}<br>${esc(EVENT.date)}　${esc(EVENT.venue)}</p></div>`;
+
+// 1. 封面
+const role = team ? 'PLAYER ・ 參賽隊伍' : staff ? 'STAFF ・ 工作人員' : esc(EVENT.date)+' ・ '+esc(EVENT.venue);
+const badge = !memorial ? '<span class="badge live">賽事進行中</span>' : team && team.place ? `<span class="badge">${esc(team.place)}</span>` : '';
+pages.push(`<section class="page cover"><div class="wrap"><img class="logo" src="img/logo.jpg" alt="">
+  <span class="kicker" style="margin-top:18px">${role}</span><span class="bigname">${esc(team||staff ? who : EVENT.full)}</span>${badge}</div>
+  <div class="hint"><i></i>向上滑動</div></section>`);
+
+if (!memorial) {
+  const msg = team
+    ? `比賽正在進行中。<br>賽後這張卡會更新成你們隊伍的<em>專屬紀念頁</em>：戰績、每位選手的六維數據、大合照與賽事原聲帶。<br>記得賽後再碰一次。`
+    : staff ? `負責項目：<em>${esc(staff.duty)}</em><br>謝謝你今天一起撐起這場比賽。賽後這張卡也會更新。`
+    : `${esc(EVENT.slogan)}。<br>賽後這裡會更新成本屆的紀念頁。`;
+  page(`<h2>TODAY</h2><div class="panel">${msg}</div>
+    <div class="btns">${btn(EVENT.stream,'觀看直播（勝部・主舞台）',true)}${btn(EVENT.discord,'加入活動 Discord', !EVENT.stream)}</div>${end}`);
+} else {
+  if (team && team.series.length) page(`<h2>RECORD</h2><div class="ptitle">本屆戰績</div><div class="series">${team.series.map(m=>`
+    <div class="row ${m.win?'w':'l'}"><div><div class="rd">${esc(m.round)}</div><div class="vs">vs ${esc(m.vs)}</div></div><div class="sc">${esc(m.score)}</div></div>`).join('')}</div>`);
+  if (team && team.players.length) page(`<h2>PLAYERS</h2>
+    <div class="toggle" id="tg"><i></i>疊上全體平均</div>
+    <div class="cards" id="cards">${team.players.map(p=>`
+      <div class="pcard"><div class="pid">${esc(p.id)}</div>
+        <div class="pmeta">${p.games ? esc(p.games)+' GAMES' : ''}${p.kda ? '　K/D/A '+esc(p.kda) : ''}</div>
+        ${radar(scores(p))}<div class="legend"><span>本人</span><span class="avg">全體平均</span></div></div>`).join('')}</div>
+    ${team.players.length>1 ? `<div class="dots" id="dots">${team.players.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe">← 左右滑動切換隊友 →</div>` : ''}`);
+  if (staff) page(`<h2>CREW</h2><div class="ptitle">${esc(staff.name)}</div><div class="panel">${esc(staff.duty)}</div>`);
+  if (EVENT.photo) page(`<h2>ALL STARS</h2><div class="ptitle">大合照</div><div class="photo"><img src="${esc(EVENT.photo)}" alt="大合照"></div>`);
+  if (EVENT.tracks.length) page(`<h2>SOUNDTRACK</h2><div class="ptitle">賽事原聲帶</div><div class="tracks">${EVENT.tracks.map((t,i)=>`
+    <div class="track" data-i="${i}"><div class="pb">▶</div><div><b>${esc(t.title)}</b><small>${esc(t.note)}</small></div></div>`).join('')}</div>`);
+  page(`<h2>THANK YOU</h2><div class="panel" style="white-space:pre-line">${esc(EVENT.thanks)}</div>
+    <div class="btns">${btn(EVENT.survey,'填寫回饋問卷，幫我們辦第二屆',true)}${btn(EVENT.discord,'活動 Discord', !EVENT.survey)}</div>${end}`);
+}
+
+$('deck').innerHTML = pages.join('');
+const P = [...document.querySelectorAll('.page')];
+$('pager').innerHTML = P.length > 1 ? P.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('') : '';
+P[0].classList.add('active');
+
+/* ---------- 換頁：斜切光刃劃過 ---------- */
+let idx = 0, busy = false;
+const EASE = 'cubic-bezier(.7,0,.25,1)', DUR = 720;
+function go(n){
+  if (busy || n < 0 || n >= P.length || n === idx) return;
+  busy = true;
+  const cur = P[idx], nxt = P[n], d = n > idx ? 1 : -1;
+  nxt.classList.add('active'); nxt.style.zIndex = 2; cur.style.zIndex = 1;
+  const from = d > 0 ? 'polygon(0 118%,100% 100%,100% 100%,0 118%)' : 'polygon(0 0,100% -18%,100% -18%,0 0)';
+  const to   = d > 0 ? 'polygon(0 0,100% -18%,100% 100%,0 118%)'    : 'polygon(0 0,100% -18%,100% 100%,0 118%)';
+  nxt.animate([{clipPath: d>0 ? from : 'polygon(0 0,100% -18%,100% -18%,0 0)'},{clipPath: to}], {duration:DUR, easing:EASE});
+  nxt.querySelector('.wrap').animate([{transform:`translateY(${d*60}px)`,opacity:.2},{transform:'none',opacity:1}], {duration:DUR, easing:EASE});
+  cur.animate([{transform:'none',opacity:1,filter:'brightness(1)'},{transform:`translateY(${-d*14}%) scale(.92)`,opacity:0,filter:'brightness(.4)'}], {duration:DUR, easing:EASE, fill:'forwards'});
+  $('sweep').animate(d > 0
+    ? [{top:'112%',opacity:1},{top:'-8%',opacity:1}]
+    : [{top:'-8%',opacity:1},{top:'112%',opacity:1}], {duration:DUR, easing:EASE});
+  $('bg').style.transform = `scale(1.05) translateY(${-n*1.2}%)`;
+  [...$('pager').children].forEach((b,i)=>b.classList.toggle('on', i===n));
+  setTimeout(() => {
+    cur.classList.remove('active'); cur.getAnimations().forEach(a=>a.cancel());
+    nxt.style.zIndex = ''; cur.style.zIndex = ''; idx = n; busy = false;
+  }, DUR + 20);
+}
+
+/* 手勢：上下滑換頁；水平滑動留給選手卡片 */
+let sx = 0, sy = 0, fsTried = false;
+const deck = $('deck');
+deck.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+deck.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx) * 1.2) { go(idx + (dy < 0 ? 1 : -1)); tryFullscreen(); }
+}, {passive:true});
+let wheelLock = 0;
+addEventListener('wheel', e => { const t = Date.now(); if (t < wheelLock || Math.abs(e.deltaY) < 20) return; wheelLock = t + DUR + 150; go(idx + (e.deltaY > 0 ? 1 : -1)); }, {passive:true});
+addEventListener('keydown', e => { if (['ArrowDown','PageDown',' '].includes(e.key)) go(idx+1); if (['ArrowUp','PageUp'].includes(e.key)) go(idx-1); });
+
+/* Android：第一次滑動時進入全螢幕，隱藏網址列（iPhone 不支援，會自動略過） */
+function tryFullscreen(){
+  if (fsTried) return; fsTried = true;
+  const el = document.documentElement;
+  if (el.requestFullscreen && !/iPhone|iPad|iPod/.test(navigator.userAgent)) el.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+}
+
+/* 平均開關、卡片圓點、原聲帶 */
+const tg = $('tg');
+if (tg) tg.onclick = () => {
+  const on = tg.classList.toggle('on');
+  document.body.classList.toggle('show-avg', on);
+  document.querySelectorAll('.avgpoly').forEach(e => e.style.display = on ? '' : 'none');
+};
+const cards = $('cards'), dots = $('dots');
+if (cards && dots) cards.addEventListener('scroll', () => {
+  const i = Math.round(cards.scrollLeft / cards.clientWidth);
+  [...dots.children].forEach((d,j) => d.classList.toggle('on', i===j));
+}, {passive:true});
+let audio = null, cur = null;
+document.querySelectorAll('.track').forEach(el => el.onclick = () => {
+  const t = EVENT.tracks[+el.dataset.i], set = (e,p) => { e.classList.toggle('playing',p); e.querySelector('.pb').textContent = p ? '❚❚' : '▶'; };
+  if (cur === el) { audio.paused ? audio.play() : audio.pause(); set(el, !audio.paused); return; }
+  if (audio) { audio.pause(); set(cur,false); }
+  audio = new Audio(t.src); audio.play(); cur = el; set(el,true);
+  audio.onended = () => set(el,false);
+});
+</script>
+</body>
+</html>
