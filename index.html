@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>第一屆淡海杯 傳說對決體驗賽</title>
-<meta property="og:title" content="第一屆淡海杯 傳說對決體驗賽">
+<title>第一屆淡海盃 傳說對決體驗賽</title>
+<meta property="og:title" content="第一屆淡海盃 傳說對決體驗賽">
 <meta property="og:description" content="給大學電競一個初次體驗的夢">
 <meta property="og:image" content="img/og.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,6 +105,15 @@ h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--go
 .dots b{width:6px;height:6px;border-radius:6px;background:#3a3d4a;transition:width .25s,background .25s}
 .dots b.on{width:20px;background:var(--gold)}
 .swipe{text-align:center;font-size:12px;color:var(--dim);margin-top:6px}
+.carousel{position:relative}
+.nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.65);color:var(--gold2);font-size:18px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.nav:hover{background:var(--gold);color:#140f02}
+.nav.prev{left:-14px}.nav.next{right:-14px}
+.dots b{cursor:pointer}
+#pager b{cursor:pointer}
+.pc{display:none}
+@media (hover:hover) and (pointer:fine){.pc{display:inline}.touch{display:none}.cards{margin:0;padding:0}}
+@media (hover:none),(pointer:coarse){.nav{display:none}}
 
 /* 照片、原聲帶 */
 .photo img{width:100%;display:block;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px))}
@@ -134,14 +143,14 @@ h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--go
 const PHASE = 'memorial';
 
 const EVENT = {
-  full: '第一屆淡海杯 傳說對決體驗賽',
+  full: '第一屆淡海盃 傳說對決體驗賽',
   date: '2026.11.22', venue: '新北電競基地',
   slogan: '給大學電競一個初次體驗的夢',
   stream: '',
   discord: 'https://discord.gg/8e4GuM6HvF',
   survey: 'https://docs.google.com/forms/d/e/1FAIpQLSeWmVN5KF-n9OYB-3fBagzso1xTDNsgWhA63olvX-iamk8JeQ/viewform',
   photos: ['img/group1.jpg', 'img/group2.jpg', 'img/group3.jpg'],   // 大合照
-  thanks: '謝謝你參加第一屆淡海杯。\n希望這一天，你有感受到站上舞台的電競氛圍。',
+  thanks: '謝謝你參加第一屆淡海盃。\n希望這一天，你有感受到站上舞台的電競氛圍。',
   tracks: [
     { title:'Pick and Ban', note:'BP 曲｜每局 Ban/Pick', src:'audio/pick-and-ban.mp3' },
     { title:'New Beginning', note:'決勝局戰歌｜BO3 第三局', src:'audio/new-beginning.mp3' },
@@ -221,7 +230,7 @@ const staff = STAFF[(q.get('s')||'').toLowerCase()];
 const memorial = PHASE === 'memorial';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $ = id => document.getElementById(id);
-const who = team ? team.name : staff ? staff.name : '淡海杯';
+const who = team ? team.name : staff ? staff.name : '淡海盃';
 document.title = (team||staff ? who+'｜' : '') + EVENT.full;
 
 /* 開場動畫 */
@@ -266,7 +275,7 @@ const role = team ? 'PLAYER ・ 參賽隊伍' : staff ? 'STAFF ・ 工作人員'
 const badge = !memorial ? '<span class="badge live">賽事進行中</span>' : team && team.place ? `<span class="badge">${esc(team.place)}</span>` : '';
 pages.push(`<section class="page cover"><div class="wrap"><img class="logo" src="img/logo.jpg" alt="">
   <span class="kicker" style="margin-top:18px">${role}</span><span class="bigname">${esc(team||staff ? who : EVENT.full)}</span>${badge}</div>
-  <div class="hint"><i></i>向上滑動</div></section>`);
+  <div class="hint"><i></i><span class="touch">向上滑動</span><span class="pc">滾動滑鼠滾輪或按 ↓ 鍵</span></div></section>`);
 
 if (!memorial) {
   const msg = team
@@ -280,19 +289,21 @@ if (!memorial) {
     <div class="row ${m.win?'w':'l'}"><div><div class="rd">${esc(m.round)}</div><div class="vs">vs ${esc(m.vs)}</div></div><div class="sc">${esc(m.score)}</div></div>`).join('')}</div>`);
   if (team && team.players.length) page(`<h2>PLAYERS</h2>
     <div class="toggle" id="tg"><i></i>疊上全體平均</div>
+    <div class="carousel"><button class="nav prev" data-c="cards" data-d="-1">‹</button><button class="nav next" data-c="cards" data-d="1">›</button>
     <div class="cards" id="cards">${team.players.map(p=>`
       <div class="pcard"><div class="pid">${esc(p.id)}</div>
         <div class="pmeta">${p.games ? esc(p.games)+' GAMES' : ''}${p.kda ? '　K/D/A '+esc(p.kda) : ''}${p.mvp ? '　MVP ×'+esc(p.mvp) : ''}</div>
-        ${radar(scores(p))}<div class="legend"><span>本人</span><span class="avg">全體平均</span></div></div>`).join('')}</div>
-    ${team.players.length>1 ? `<div class="dots" id="dots">${team.players.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe">← 左右滑動切換隊友 →</div>` : ''}`);
+        ${radar(scores(p))}<div class="legend"><span>本人</span><span class="avg">全體平均</span></div></div>`).join('')}</div></div>
+    ${team.players.length>1 ? `<div class="dots" id="dots">${team.players.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe"><span class="touch">← 左右滑動切換隊友 →</span><span class="pc">點左右箭頭或按 ← → 鍵切換隊友</span></div>` : ''}`);
   if (staff) {
     page(`<h2>CREW</h2><div class="ptitle">${esc(staff.name)}</div><div class="panel">工作人員的紀念頁<em>正在製作中</em>，完成後這張卡會自動更新，敬請期待。</div>
       <div class="btns">${btn(EVENT.discord,'活動 Discord',true)}</div>${end}`);
   } else {
   const gal = [...((team && team.photos) || []), ...EVENT.photos];
   if (gal.length) page(`<h2>PHOTOS</h2><div class="ptitle">合照</div>
-    <div class="cards" id="gal">${gal.map(p=>`<div class="photo" style="flex:0 0 100%;scroll-snap-align:center"><img src="${esc(p)}" alt="合照"></div>`).join('')}</div>
-    ${gal.length>1 ? `<div class="dots" id="gdots">${gal.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe">← 左右滑動看更多 →</div>` : ''}`);
+    <div class="carousel"><button class="nav prev" data-c="gal" data-d="-1">‹</button><button class="nav next" data-c="gal" data-d="1">›</button>
+    <div class="cards" id="gal">${gal.map(p=>`<div class="photo" style="flex:0 0 100%;scroll-snap-align:center"><img src="${esc(p)}" alt="合照"></div>`).join('')}</div></div>
+    ${gal.length>1 ? `<div class="dots" id="gdots">${gal.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe"><span class="touch">← 左右滑動看更多 →</span><span class="pc">點左右箭頭或按 ← → 鍵看更多</span></div>` : ''}`);
   if (EVENT.tracks.length) page(`<h2>SOUNDTRACK</h2><div class="ptitle">賽事原聲帶</div><div class="tracks">${EVENT.tracks.map((t,i)=>`
     <div class="track" data-i="${i}"><div class="pb">▶</div><div><b>${esc(t.title)}</b><small>${esc(t.note)}</small></div></div>`).join('')}</div>`);
   page(`<h2>THANK YOU</h2><div class="panel" style="white-space:pre-line">${esc(EVENT.thanks)}</div>
@@ -338,8 +349,17 @@ deck.addEventListener('touchend', e => {
   if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx) * 1.2) { go(idx + (dy < 0 ? 1 : -1)); tryFullscreen(); }
 }, {passive:true});
 let wheelLock = 0;
-addEventListener('wheel', e => { const t = Date.now(); if (t < wheelLock || Math.abs(e.deltaY) < 20) return; wheelLock = t + DUR + 150; go(idx + (e.deltaY > 0 ? 1 : -1)); }, {passive:true});
-addEventListener('keydown', e => { if (['ArrowDown','PageDown',' '].includes(e.key)) go(idx+1); if (['ArrowUp','PageUp'].includes(e.key)) go(idx-1); });
+addEventListener('wheel', e => { const t = Date.now(); if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; if (t < wheelLock || Math.abs(e.deltaY) < 20) return; wheelLock = t + DUR + 150; go(idx + (e.deltaY > 0 ? 1 : -1)); }, {passive:true});
+const slide = (c, d) => { const el = $(c); if (el) el.scrollBy({ left: d * el.clientWidth, behavior: 'smooth' }); };
+const slideTo = (c, i) => { const el = $(c); if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' }); };
+addEventListener('keydown', e => {
+  if (['ArrowDown','PageDown',' '].includes(e.key)) go(idx+1);
+  if (['ArrowUp','PageUp'].includes(e.key)) go(idx-1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const c = P[idx].querySelector('.cards'); if (c) slide(c.id, e.key === 'ArrowRight' ? 1 : -1); }
+});
+document.querySelectorAll('.nav').forEach(b => b.onclick = () => slide(b.dataset.c, +b.dataset.d));
+[['cards','dots'],['gal','gdots']].forEach(([c,d]) => { const dots = $(d); if (dots) [...dots.children].forEach((b,i) => b.onclick = () => slideTo(c, i)); });
+[...$('pager').children].forEach((b,i) => b.onclick = () => go(i));
 
 /* Android：第一次滑動時進入全螢幕，隱藏網址列（iPhone 不支援，會自動略過） */
 function tryFullscreen(){
