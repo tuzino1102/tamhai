@@ -97,10 +97,10 @@ h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--go
 .pid{font-weight:900;font-size:22px}
 .pmeta{font-family:Orbitron,sans-serif;font-size:11px;letter-spacing:.15em;color:var(--dim);margin-top:2px}
 .pcard svg{display:block;width:100%;max-height:40dvh;margin-top:4px}
-.legend{display:flex;gap:16px;justify-content:center;font-size:12px;color:var(--dim)}
+.legend{display:none;gap:16px;justify-content:center;font-size:12px;color:var(--dim)}
+.show-avg .legend{display:flex}
 .legend span::before{content:"";display:inline-block;width:12px;height:3px;margin-right:6px;vertical-align:3px;background:var(--gold)}
 .legend span.avg::before{background:#fff;opacity:.8}
-.legend .avg{display:none}.show-avg .legend .avg{display:inline}
 .dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
 .dots b{width:6px;height:6px;border-radius:6px;background:#3a3d4a;transition:width .25s,background .25s}
 .dots b.on{width:20px;background:var(--gold)}
@@ -152,7 +152,7 @@ const EVENT = {
 /* 選手數據為「場均」值（由 Claude 從結算截圖統計）
    dmg 對英雄傷害｜taken 承受英雄傷害｜part 參團率(%)｜gold 總經濟｜cc 控制效果｜heal 治療量｜tower 對塔傷害 */
 const TEAMS = {
-  a: { name: "兄弟你還活著嗎", place: '冠軍',
+  a: { name: "兄弟你還活著嗎", place: '冠軍', photos: ['img/team-a-1.jpg', 'img/team-a-2.jpg'],
     series: [
       { round:'勝部 W1', vs:"台大淡大出征淡海", score:'2 : 0', win:true },
       { round:'勝部決賽', vs:"閃身步", score:'1 : 2', win:false },
@@ -166,7 +166,7 @@ const TEAMS = {
       {"id": "Y!Jıä..", "games": 9, "kda": "19/13/104", "mvp": 4, "gold": 8270.6, "dmg": 44327.3, "taken": 100926.1, "part": 82.8, "cc": 16008.7, "heal": 80609.6, "tower": 2708.0},
       {"id": "luvwony..", "games": 9, "kda": "36/18/48", "mvp": 0, "gold": 10257.4, "dmg": 58428.2, "taken": 50409.2, "part": 56.9, "cc": 5001.3, "heal": 22209.4, "tower": 9793.9},
     ] },
-  b: { name: "台大淡大出征淡海", place: '第四名',
+  b: { name: "台大淡大出征淡海", place: '殿軍', photos: ['img/team-b-1.jpg', 'img/team-b-2.jpg'],
     series: [
       { round:'勝部 W1', vs:"兄弟你還活著嗎", score:'0 : 2', win:false },
       { round:'敗部 L1', vs:"兵線給你野區給我", score:'0 : 2', win:false },
@@ -178,7 +178,7 @@ const TEAMS = {
       {"id": ".◉‿◉.", "games": 4, "kda": "1/16/12", "mvp": 0, "gold": 6815.5, "dmg": 32912.5, "taken": 99247.8, "part": 56.2, "cc": 9850.5, "heal": 23865.0, "tower": 291.5},
       {"id": "嘉嘉_ღ", "games": 4, "kda": "4/8/8", "mvp": 1, "gold": 7643.8, "dmg": 69078.5, "taken": 41644.0, "part": 52.1, "cc": 5923.5, "heal": 70685.2, "tower": 669.2},
     ] },
-  c: { name: "閃身步", place: '亞軍',
+  c: { name: "閃身步", place: '亞軍', photos: ['img/team-c-1.jpg', 'img/team-c-2.jpg'],
     series: [
       { round:'勝部 W2', vs:"兵線給你野區給我", score:'2 : 0', win:true },
       { round:'勝部決賽', vs:"兄弟你還活著嗎", score:'2 : 1', win:true },
@@ -191,7 +191,7 @@ const TEAMS = {
       {"id": "Mobbb̷.͙ও", "games": 7, "kda": "20/20/31", "mvp": 1, "gold": 10327.0, "dmg": 91302.3, "taken": 65474.4, "part": 50.0, "cc": 12398.6, "heal": 55272.4, "tower": 4033.6},
       {"id": "FW_Eternally", "games": 7, "kda": "15/20/27", "mvp": 1, "gold": 10397.3, "dmg": 61407.9, "taken": 49502.1, "part": 45.2, "cc": 1942.3, "heal": 14413.4, "tower": 11107.4},
     ] },
-  d: { name: "兵線給你野區給我", place: '季軍',
+  d: { name: "兵線給你野區給我", place: '季軍', photos: ['img/team-d-1.jpg', 'img/team-d-2.jpg'],
     series: [
       { round:'勝部 W2', vs:"閃身步", score:'0 : 2', win:false },
       { round:'敗部 L1', vs:"台大淡大出征淡海", score:'2 : 0', win:true },
@@ -289,9 +289,10 @@ if (!memorial) {
     page(`<h2>CREW</h2><div class="ptitle">${esc(staff.name)}</div><div class="panel">工作人員的紀念頁<em>正在製作中</em>，完成後這張卡會自動更新，敬請期待。</div>
       <div class="btns">${btn(EVENT.discord,'活動 Discord',true)}</div>${end}`);
   } else {
-  if (EVENT.photos.length) page(`<h2>ALL STARS</h2><div class="ptitle">大合照</div>
-    <div class="cards" id="gal">${EVENT.photos.map(p=>`<div class="photo" style="flex:0 0 100%;scroll-snap-align:center"><img src="${esc(p)}" alt="大合照"></div>`).join('')}</div>
-    ${EVENT.photos.length>1 ? `<div class="dots" id="gdots">${EVENT.photos.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe">← 左右滑動看更多 →</div>` : ''}`);
+  const gal = [...((team && team.photos) || []), ...EVENT.photos];
+  if (gal.length) page(`<h2>PHOTOS</h2><div class="ptitle">合照</div>
+    <div class="cards" id="gal">${gal.map(p=>`<div class="photo" style="flex:0 0 100%;scroll-snap-align:center"><img src="${esc(p)}" alt="合照"></div>`).join('')}</div>
+    ${gal.length>1 ? `<div class="dots" id="gdots">${gal.map((_,i)=>`<b class="${i?'':'on'}"></b>`).join('')}</div><div class="swipe">← 左右滑動看更多 →</div>` : ''}`);
   if (EVENT.tracks.length) page(`<h2>SOUNDTRACK</h2><div class="ptitle">賽事原聲帶</div><div class="tracks">${EVENT.tracks.map((t,i)=>`
     <div class="track" data-i="${i}"><div class="pb">▶</div><div><b>${esc(t.title)}</b><small>${esc(t.note)}</small></div></div>`).join('')}</div>`);
   page(`<h2>THANK YOU</h2><div class="panel" style="white-space:pre-line">${esc(EVENT.thanks)}</div>
